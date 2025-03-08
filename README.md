@@ -39,4 +39,18 @@ npm run push
 1. Open app with `npx clasp open`
 1. Run `processAll`.
 
- ***`processAll` may time out due to [Script runtime limitation](https://developers.google.com/apps-script/guides/services/quotas#current_limitations) but if it does, you can rerun it to resume from where it left off.***
+***`processAll` may time out due to [Script runtime limitation](https://developers.google.com/apps-script/guides/services/quotas#current_limitations) but if it does, you can rerun it to resume from where it left off.***
+
+## FAQ?
+
+### Cannot deploy
+
+See [clasp's README](https://github.com/google/clasp/blob/master/README.md).
+
+### Cannot sync
+
+Please check the following:
+- Have you run `processAll`?
+  - Ensure you complete the authorization process after clicking the execute button. (see [Sync past events](#sync-past-events-must-do-once-for-execution-permission))
+- Do you have the required access permissions for the calendars specified by `SOURCE_CALENDAR_ID` and `TARGET_CALENDAR_ID`?
+  - For `TARGET_CALENDAR_ID`, you need permission to create events.
