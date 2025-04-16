@@ -42,9 +42,16 @@ function processAll() {
 
 function getEvents(calendarId: string, option: { syncToken?: string, pageToken?: string } = {}) {
   try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return Calendar.Events?.list(
       calendarId,
-      { ...option, maxResults: 9999 }
+      {
+        ...option,
+        maxResults: 9999,
+        timeMin: today.toISOString(),
+      },
     );
   } catch (e) {
     if (e instanceof Error) {
@@ -66,7 +73,8 @@ function syncEvent(events: GoogleAppsScript.Calendar.Schema.Event[], config: Con
     if (event.id) {
       try {
         existingEvent = Calendar.Events?.get(config.targetCalendarId, event.id);
-        Calendar.Events?.update(newEvent, config.targetCalendarId, event.id, { sendUpdates: 'none' }, { 'If-Match': existingEvent?.etag });
+        Calendar.Events?.update(newEvent, config.targetCalendarId, event.id, { sendUpdates: 'none' });
+        console.log("update existing event");
         return;
       } catch (e) {
         console.log(e);
@@ -75,9 +83,11 @@ function syncEvent(events: GoogleAppsScript.Calendar.Schema.Event[], config: Con
         if (event.status === 'cancelled') {
           if (existingEvent) {
             Calendar.Events?.remove(config.targetCalendarId, event.id!, { sendUpdates: 'none' });
-          }
+            console.log("removed existing event");
+          }``
         } else {
           Calendar.Events?.insert(newEvent, config.targetCalendarId, { sendUpdates: 'none' });
+          console.log("inserted new event");
         }
       } catch (e) {
         console.log(e);
