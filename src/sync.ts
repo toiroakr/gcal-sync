@@ -73,7 +73,7 @@ function syncEvent(events: GoogleAppsScript.Calendar.Schema.Event[], config: Con
     if (event.id) {
       try {
         existingEvent = Calendar.Events?.get(config.targetCalendarId, event.id);
-        Calendar.Events?.update(newEvent, config.targetCalendarId, event.id, { sendUpdates: 'none' });
+        Calendar.Events?.update(newEvent, config.targetCalendarId, event.id, { sendUpdates: 'none' }, { 'If-Match': existingEvent?.etag });
         console.log("update existing event");
         return;
       } catch (e) {
