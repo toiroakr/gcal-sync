@@ -4,8 +4,13 @@ type Config = ReturnType<typeof getConfig>;
 function onCalendarEdit() {
   const config = getConfig();
 
-  let events = getEvents(config.sourceCalendarId);
-  while (events && events.items) {
+  const scriptProperties = PropertiesService.getScriptProperties();
+  const properties = scriptProperties.getProperties();
+
+  let events = getEvents(config.sourceCalendarId, {
+    syncToken: properties.syncToken,
+  });
+  while (properties.syncToken && events && events.items) {
     syncEvent(events.items, config);
     if (events.nextPageToken) {
       events = getEvents(config.sourceCalendarId, {
@@ -15,6 +20,9 @@ function onCalendarEdit() {
       break;
     }
   }
+
+  scriptProperties.setProperty("syncToken", events?.nextSyncToken ?? "");
+  console.log(scriptProperties.getProperties());
 }
 
 function processAll() {
@@ -68,22 +76,26 @@ function reverseCheck() {
 
 function getEvents(
   calendarId: string,
-  option: { pageToken?: string } = {},
+  option: { syncToken?: string; pageToken?: string } = {},
 ) {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const twoWeeksAfter = new Date();
-    twoWeeksAfter.setHours(0, 0, 0, 0);
-    twoWeeksAfter.setDate(twoWeeksAfter.getDate() + 7);
+    const options: Record<string, string> = { ...option };
+    if (!options.syncToken) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const twoWeeksAfter = new Date();
+      twoWeeksAfter.setHours(0, 0, 0, 0);
+      twoWeeksAfter.setDate(twoWeeksAfter.getDate() + 7);
+
+      options.timeMin = today.toISOString();
+      options.timeMax = twoWeeksAfter.toISOString();
+    }
 
     return Calendar.Events?.list(
       calendarId,
       {
-        ...option,
+        ...options,
         maxResults: 9999,
-        timeMin: today.toISOString(),
-        timeMax: twoWeeksAfter.toISOString(),
       },
     );
   } catch (e) {
