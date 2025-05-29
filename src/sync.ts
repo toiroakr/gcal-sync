@@ -83,12 +83,11 @@ function getEvents(
     if (!options.syncToken) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const twoWeeksAfter = new Date();
-      twoWeeksAfter.setHours(0, 0, 0, 0);
-      twoWeeksAfter.setDate(twoWeeksAfter.getDate() + 14);
+      const nextMonth = new Date(today.getTime());
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
 
       options.timeMin = today.toISOString();
-      options.timeMax = twoWeeksAfter.toISOString();
+      options.timeMax = nextMonth.toISOString();
     }
 
     return Calendar.Events?.list(
