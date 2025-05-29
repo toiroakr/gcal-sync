@@ -85,7 +85,7 @@ function getEvents(
       today.setHours(0, 0, 0, 0);
       const twoWeeksAfter = new Date();
       twoWeeksAfter.setHours(0, 0, 0, 0);
-      twoWeeksAfter.setDate(twoWeeksAfter.getDate() + 7);
+      twoWeeksAfter.setDate(twoWeeksAfter.getDate() + 14);
 
       options.timeMin = today.toISOString();
       options.timeMax = twoWeeksAfter.toISOString();
@@ -155,8 +155,7 @@ function reverseSyncEvent(
   events: GoogleAppsScript.Calendar.Schema.Event[],
   config: Config,
 ) {
-  events
-    .filter((event) => event.colorId === config.targetColorId)
+  events?.filter((event) => event.colorId === config.targetColorId)
     .forEach((event) => {
       let sourceEvent: CalendarEvent | undefined;
       if (event.id) {
@@ -164,8 +163,13 @@ function reverseSyncEvent(
           sourceEvent = Calendar.Events?.get(config.sourceCalendarId, event.id);
 
           if (sourceEvent) {
+            const updatedEvent = {
+              ...sourceEvent,
+              colorId: config.targetColorId,
+            };
             console.log("update existing event");
-            Calendar.Events?.update(sourceEvent, config.targetCalendarId, event.id, { sendUpdates: 'none' }, { 'If-Match': event?.etag });
+            console.log(updatedEvent);
+            Calendar.Events?.update(updatedEvent, config.targetCalendarId, event.id, { sendUpdates: 'none' }, { 'If-Match': event?.etag });
           }
           return;
         } catch (e) {
