@@ -100,6 +100,11 @@ function getEvents(
   } catch (e) {
     if (e instanceof Error) {
       console.log(e);
+      if (e.message.includes("Sync token is no longer valid")) {
+        const scriptProperties = PropertiesService.getScriptProperties();
+        scriptProperties.deleteProperty("syncToken");
+        onCalendarEdit();
+      }
     }
     throw e;
   }
@@ -120,7 +125,10 @@ function syncEvent(
       let existingEvent: CalendarEvent | undefined;
       if (event.id) {
         try {
-          existingEvent = Calendar.Events?.get(config.targetCalendarId, event.id);
+          existingEvent = Calendar.Events?.get(
+            config.targetCalendarId,
+            event.id,
+          );
           Calendar.Events?.update(newEvent, config.targetCalendarId, event.id, {
             sendUpdates: "none",
           }, { "If-Match": existingEvent?.etag });
@@ -168,7 +176,13 @@ function reverseSyncEvent(
             };
             console.log("update existing event");
             console.log(updatedEvent);
-            Calendar.Events?.update(updatedEvent, config.targetCalendarId, event.id, { sendUpdates: 'none' }, { 'If-Match': event?.etag });
+            Calendar.Events?.update(
+              updatedEvent,
+              config.targetCalendarId,
+              event.id,
+              { sendUpdates: "none" },
+              { "If-Match": event?.etag },
+            );
           }
           return;
         } catch (e) {
